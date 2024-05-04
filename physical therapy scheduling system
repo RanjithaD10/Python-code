@@ -1,0 +1,209 @@
+import streamlit as st
+
+# Define functions from the second script (Registration System)
+users = []
+doctors = []
+
+def register_user():
+    st.header("User Registration")
+    username = st.text_input("Username")
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
+    if st.button("Register"):
+        users.append({'username': username, 'email': email, 'password': password})
+        st.success("User registered successfully!")
+
+def register_doctor():
+    st.header("Doctor Registration")
+    name = st.text_input("Name")
+    specialization = st.text_input("Specialization")
+    if st.button("Register"):
+        doctors.append({'name': name, 'specialization': specialization})
+        st.success("Doctor registered successfully!")
+
+# Define classes from the first script (Hospital Management System)
+class Patient:
+    def __init__(self, name, age, gender, email, contact):
+        self.name = name
+        self.age = age
+        self.gender = gender
+        self.email = email
+        self.contact = contact
+
+class AppointmentScheduler:
+    def __init__(self):
+        self.appointments = {}
+
+    def schedule_appointment(self, date, time, patient_name):
+        if date in self.appointments:
+            if time in self.appointments[date]:
+                st.error("Appointment slot already taken.")
+            else:
+                self.appointments[date][time] = patient_name
+                st.success("Appointment scheduled successfully!")
+        else:
+            self.appointments[date] = {time: patient_name}
+            st.success("Appointment scheduled successfully!")
+
+    def display_schedule(self):
+        if not self.appointments:
+            st.write("scheduled appointment.")
+        else:
+            st.write("no Scheduled Appointments:")
+            for date, appointments in self.appointments.items():
+                st.write(f"\nDate: {date}")
+                for time, patient_name in appointments.items():
+                    st.write(f"Time: {time}, Patient: {patient_name}")
+
+class TreatmentPlan:
+    def _init_(self):
+        self.plans = {}
+
+    def add_plan(self, patient_name, disease, plan):
+        self.plans[patient_name] = {"Disease": disease, "Plan": plan}
+        st.success("Treatment plan added successfully!")
+
+    def remove_plan(self, patient_name):
+        if patient_name in self.plans:
+            del self.plans[patient_name]
+            st.success("Treatment plan removed successfully!")
+        else:
+            st.error("no treatment plan found for the patient.")
+
+    def display_plans(self):
+        if not self.plans:
+            st.write("treatment plans available.")
+        else:
+            st.write("no Treatment Plans:")
+            for patient_name, details in self.plans.items():
+                st.write(f"\nPatient Name: {patient_name}")
+                st.write(f"Disease: {details['Disease']}")
+                st.write("Treatment Plan:")
+                for step, description in details['Plan'].items():
+                    st.write(f"Step {step}: {description}")
+
+class PatientProgressTracker:
+    def _init_(self):
+        self.progress = {}
+
+    def add_progress(self, patient_name, symptoms, improvement):
+        if patient_name in self.progress:
+            self.progress[patient_name].append({"Symptoms": symptoms, "Improvement": improvement})
+        else:
+            self.progress[patient_name] = [{"Symptoms": symptoms, "Improvement": improvement}]
+        st.success("Progress added successfully!")
+
+    def display_progress(self):
+        if not self.progress:
+            st.write("progress tracked yet.")
+        else:
+            st.write("no Patient Progress:")
+            for patient_name, entries in self.progress.items():
+                st.write(f"\nPatient Name: {patient_name}")
+                for i, entry in enumerate(entries, 1):
+                    st.write(f"Entry {i}:")
+                    st.write(f"Symptoms: {entry['Symptoms']}")
+                    st.write(f"Improvement: {entry['Improvement']}")
+
+class PatientFeedback:
+    def _init_(self):
+        self.feedback = {}
+
+    def add_feedback(self, patient_name, feedback, rating):
+        self.feedback[patient_name] = {"Feedback": feedback, "Rating": rating}
+        st.success("Feedback and rating added successfully!")
+
+    def display_feedback(self):
+        if not self.feedback:
+            st.write("feedback submitted yet.")
+        else:
+            st.write("no Patient Feedback:")
+            for patient_name, data in self.feedback.items():
+                st.write(f"\nPatient Name: {patient_name}")
+                st.write(f"Feedback: {data['Feedback']}")
+                st.write(f"Rating: {data['Rating']}")
+
+def main():
+    st.title("Hospital and Registration Management System")
+
+    menu = ["Hospital Management", "User Registration", "Doctor Registration"]
+    choice = st.sidebar.selectbox("Select Option", menu)
+
+    if choice == "Hospital Management":
+        hospital_management()
+    elif choice == "User Registration":
+        register_user()
+    elif choice == "Doctor Registration":
+        register_doctor()
+
+def hospital_management():
+    patients = {}
+    appointments = AppointmentScheduler()
+    treatment_plans = TreatmentPlan()
+    progress_tracker = PatientProgressTracker()
+    feedback_collector = PatientFeedback()
+
+    st.title("Hospital Management System")
+
+    submenu = ["Add Patient Details", "Schedule Appointment", "Add Treatment Plan", "Add Patient Progress",
+                "Add Patient Feedback and Rating", "Display Appointment Schedule", "Display Treatment Plans",
+                "Display Patient Progress", "Display Patient Feedback"]
+
+    sub_choice = st.selectbox("Select Hospital Management Option", submenu)
+
+    if sub_choice == "Add Patient Details":
+        name = st.text_input("Enter patient's name:")
+        age = st.text_input("Enter patient's age:")
+        gender = st.selectbox("Select patient's gender:", ["Male", "Female", "Other"])
+        email = st.text_input("Enter patient's email:")
+        contact = st.text_input("Enter patient's contact number:")
+        if st.button("Add Patient"):
+            patients[name] = Patient(name, age, gender, email, contact)
+            st.success("Patient details added successfully!")
+
+    elif sub_choice == "Schedule Appointment":
+        date = st.text_input("Enter date (YYYY-MM-DD):")
+        time = st.text_input("Enter time (HH:MM):")
+        patient_name = st.text_input("Enter patient's name:")
+        if st.button("Schedule Appointment"):
+            appointments.schedule_appointment(date, time, patient_name)
+
+    elif sub_choice == "Add Treatment Plan":
+        patient_name = st.text_input("Enter patient's name:")
+        disease = st.text_input("Enter patient's disease:")
+        num_steps = st.number_input("Enter the number of steps in the treatment plan:", min_value=1, step=1)
+        plan = {}
+        for i in range(1, num_steps + 1):
+            step_description = st.text_input(f"Enter description for step {i}:")
+            plan[i] = step_description
+        if st.button("Add Plan"):
+            treatment_plans.add_plan(patient_name, disease, plan)
+
+    elif sub_choice == "Add Patient Progress":
+        patient_name = st.text_input("Enter patient's name:")
+        symptoms = st.text_input("Enter patient's symptoms:")
+        improvement = st.text_input("Enter improvement noticed (if any):")
+        if st.button("Add Progress"):
+            progress_tracker.add_progress(patient_name, symptoms, improvement)
+
+    elif sub_choice == "Add Patient Feedback and Rating":
+        patient_name = st.text_input("Enter patient's name:")
+        feedback = st.text_area("Enter patient's feedback:")
+        rating = st.slider("Enter patient's rating (1-5):", 1, 5)
+        if st.button("Add Feedback"):
+            feedback_collector.add_feedback(patient_name, feedback, rating)
+
+    elif sub_choice == "Display Appointment Schedule":
+        appointments.display_schedule()
+
+    elif sub_choice == "Display Treatment Plans":
+        treatment_plans.display_plans()
+
+    elif sub_choice == "Display Patient Progress":
+        progress_tracker.display_progress()
+
+    elif sub_choice == "Display Patient Feedback":
+        feedback_collector.display_feedback()
+
+if __name__ == "__main__":
+    main()
